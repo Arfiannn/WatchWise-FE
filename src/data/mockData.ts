@@ -60,10 +60,31 @@ export const mockMovies: Movie[] = [
         synopsis: 'A team of explorers travel through a wormhole in space in an attempt to ensure humanitys survival.',
         poster: 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=400&h=600&fit=crop',
         viewCount: 890
+    },
+    // ➕ Data Dummy Tambahan
+    {
+        id: '7',
+        title: 'The Matrix',
+        genre: ['Action', 'Sci-Fi'],
+        year: 1999,
+        rating: 8.7,
+        synopsis: 'A computer hacker learns about the true nature of reality and his role in the war against its controllers.',
+        poster: 'https://images.unsplash.com/photo-1525186402429-b4ff38bedbec?w=400&h=600&fit=crop',
+        viewCount: 1100
+    },
+    {
+        id: '8',
+        title: 'Coco',
+        genre: ['Animation', 'Adventure', 'Family'],
+        year: 2017,
+        rating: 8.4,
+        synopsis: 'Aspiring musician Miguel enters the Land of the Dead to find his great-great-grandfather, a legendary singer.',
+        poster: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=600&fit=crop',
+        viewCount: 540
     }
-    ];
+];
 
-    export const mockReviews: Review[] = [
+export const mockReviews: Review[] = [
     {
         id: '1',
         movieId: '1',
@@ -99,5 +120,24 @@ export const mockMovies: Movie[] = [
         rating: 9,
         comment: 'Mind-bending and visually stunning. Christopher Nolan at his best.',
         date: '2024-01-25'
+    },
+    // ➕ Review Dummy Tambahan
+    {
+        id: '5',
+        movieId: '7',
+        userId: 'user4',
+        userName: 'Alice Brown',
+        rating: 9,
+        comment: 'The Matrix redefined sci-fi movies. A true classic!',
+        date: '2024-02-01'
+    },
+    {
+        id: '6',
+        movieId: '8',
+        userId: 'user5',
+        userName: 'Carlos Rivera',
+        rating: 8,
+        comment: 'Heartwarming and visually stunning. Loved the music!',
+        date: '2024-02-05'
     }
 ];
