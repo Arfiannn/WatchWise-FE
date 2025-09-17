@@ -1,14 +1,15 @@
 import MovieGrid from '@/components/MovieGrid';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { Movie } from '@/lib/types';
 import { BarChart3, Film, Settings } from 'lucide-react';
 import { useState } from 'react';
 import AdminPanel from '../components/AdminPanel';
+import ReviewSection from '../components/ReviewSection';
 import SearchFilter from '../components/SearchFilter';
 import Statistics from '../components/Statistics';
+import UserProfile from '../components/UserProfile';
 import { useMovieStore } from '../lib/movieStore';
-import ReviewSection from '../components/ReviewSection';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 
 export default function Index() {
@@ -32,6 +33,7 @@ export default function Index() {
                 </p>
             </div>
             <div className="absolute top-8 right-8">
+                <UserProfile />
             </div>
             </div>
 
