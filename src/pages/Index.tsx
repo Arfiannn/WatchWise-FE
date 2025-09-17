@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { Movie } from '@/lib/types';
 import { BarChart3, Film, Settings } from 'lucide-react';
 import { useState } from 'react';
+import SearchFilter from '../components/SearchFilter';
 import Statistics from '../components/Statistics';
 import { useMovieStore } from '../lib/movieStore';
 
@@ -49,8 +50,9 @@ export default function Index() {
 
             {/* Movies Tab */}
             <TabsContent value="movies" className="space-y-6">
-                <MovieGrid 
-                movies={filteredMovies} 
+                <SearchFilter />
+                <MovieGrid
+                movies={filteredMovies}
                 onMovieClick={setSelectedMovie}
                 />
             </TabsContent>
