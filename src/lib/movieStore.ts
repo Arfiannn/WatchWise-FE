@@ -1,68 +1,68 @@
-import type { Movie, Review } from '@/lib/types';
+import type { Movie } from '@/services/movieService';
 import { create } from 'zustand';
-import { mockMovies, mockReviews } from '../data/mockData';
+import * as api from '@/lib/api';
 
 interface MovieStore {
     movies: Movie[];
-    reviews: Review[];
+    isLoading: boolean;
+    error: string | null;
+
     searchQuery: string;
     selectedGenres: string[];
     sortBy: 'title' | 'year' | 'rating' | 'viewCount';
     viewMode: 'grid' | 'list';
-    
+
     // Actions
-    addMovie: (movie: Omit<Movie, 'id'>) => void;
-    updateMovie: (id: string, movie: Partial<Movie>) => void;
-    deleteMovie: (id: string) => void;
-    addReview: (review: Omit<Review, 'id'>) => void;
+    fetchMovies: () => Promise<void>;
+    addMovie: (movie: Omit<Movie, 'id_movies'>) => Promise<void>;
+    updateMovie: (id_movies: number | string, movie: Partial<Movie>) => Promise<void>;
+    deleteMovie: (id_movies: number | string) => Promise<void>;
+
     setSearchQuery: (query: string) => void;
     setSelectedGenres: (genres: string[]) => void;
     setSortBy: (sortBy: 'title' | 'year' | 'rating' | 'viewCount') => void;
     setViewMode: (mode: 'grid' | 'list') => void;
+
     getFilteredMovies: () => Movie[];
-    getMovieReviews: (movieId: string) => Review[];
-    getAverageRating: (movieId: string) => number;
     }
 
     export const useMovieStore = create<MovieStore>((set, get) => ({
-    movies: mockMovies,
-    reviews: mockReviews,
+    movies: [],
+    isLoading: false,
+    error: null,
+
     searchQuery: '',
     selectedGenres: [],
     sortBy: 'title',
     viewMode: 'grid',
 
-    addMovie: (movie) => {
-        const newMovie: Movie = {
-        ...movie,
-        id: Date.now().toString(),
-        viewCount: 0
-        };
+    fetchMovies: async () => {
+        try {
+        set({ isLoading: true });
+        const movies = await api.getMovies();
+        set({ movies, isLoading: false });
+        } catch (error: any) {
+        set({ error: error.message, isLoading: false });
+        }
+    },
+
+    addMovie: async (movie) => {
+        const newMovie = await api.createMovie(movie);
         set((state) => ({ movies: [...state.movies, newMovie] }));
     },
 
-    updateMovie: (id, updatedMovie) => {
+    updateMovie: async (id_movies, updatedMovie) => {
+        const updated = await api.updateMovie(id_movies, updatedMovie);
         set((state) => ({
-        movies: state.movies.map((movie) =>
-            movie.id === id ? { ...movie, ...updatedMovie } : movie
-        )
+        movies: state.movies.map((m) => (m.id_movies === +id_movies ? updated : m)),
         }));
     },
 
-    deleteMovie: (id) => {
+    deleteMovie: async (id_movies) => {
+        await api.deleteMovie(id_movies);
         set((state) => ({
-        movies: state.movies.filter((movie) => movie.id !== id),
-        reviews: state.reviews.filter((review) => review.movieId !== id)
+        movies: state.movies.filter((m) => m.id_movies !== +id_movies),
         }));
-    },
-
-    addReview: (review) => {
-        const newReview: Review = {
-        ...review,
-        id: Date.now().toString(),
-        date: new Date().toISOString().split('T')[0]
-        };
-        set((state) => ({ reviews: [...state.reviews, newReview] }));
     },
 
     setSearchQuery: (query) => set({ searchQuery: query }),
@@ -72,16 +72,17 @@ interface MovieStore {
 
     getFilteredMovies: () => {
         const { movies, searchQuery, selectedGenres, sortBy } = get();
-        
+
         const filtered = movies.filter((movie) => {
-        const matchesSearch = movie.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            movie.synopsis.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesGenre = selectedGenres.length === 0 || 
-                            selectedGenres.some(genre => movie.genre.includes(genre));
+        const matchesSearch =
+            movie.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            movie.synopsis.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesGenre =
+            selectedGenres.length === 0 ||
+            selectedGenres.some((genre) => movie.genre.includes(genre));
         return matchesSearch && matchesGenre;
         });
 
-        // Sort movies
         filtered.sort((a, b) => {
         switch (sortBy) {
             case 'year':
@@ -89,7 +90,7 @@ interface MovieStore {
             case 'rating':
             return b.rating - a.rating;
             case 'viewCount':
-            return (b.viewCount || 0) - (a.viewCount || 0);
+            return (b.view_count || 0) - (a.view_count || 0);
             default:
             return a.title.localeCompare(b.title);
         }
@@ -97,15 +98,4 @@ interface MovieStore {
 
         return filtered;
     },
-
-    getMovieReviews: (movieId) => {
-        return get().reviews.filter((review) => review.movieId === movieId);
-    },
-
-    getAverageRating: (movieId) => {
-        const movieReviews = get().getMovieReviews(movieId);
-        if (movieReviews.length === 0) return 0;
-        const sum = movieReviews.reduce((acc, review) => acc + review.rating, 0);
-        return Math.round((sum / movieReviews.length) * 10) / 10;
-    }
 }));

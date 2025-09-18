@@ -7,17 +7,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import UserProfile from '@/components/UserProfile';
 import { useMovieStore } from '@/lib/movieStore';
-import type { Movie } from '@/lib/types';
+import type { Movie } from '@/services/movieService';
 import { BarChart3, Film, Settings } from 'lucide-react';
-import { useState } from 'react';
-
+import { useEffect, useState } from 'react';
+import { genreToArray } from '@/lib/utils'; // helper untuk convert genre string ke array
 
 export default function Index() {
-    const { getFilteredMovies } = useMovieStore();
+    const { getFilteredMovies, fetchMovies } = useMovieStore();
     const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
     const [activeTab, setActiveTab] = useState('movies');
-    
+
     const filteredMovies = getFilteredMovies();
+
+    useEffect(() => {
+        fetchMovies();
+    }, []);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -57,24 +61,21 @@ export default function Index() {
             {/* Movies Tab */}
             <TabsContent value="movies" className="space-y-6">
                 <SearchFilter />
-                <MovieGrid
-                movies={filteredMovies}
-                onMovieClick={setSelectedMovie}
-                />
+                <MovieGrid movies={filteredMovies} onMovieClick={setSelectedMovie} />
             </TabsContent>
 
             {/* Statistics Tab */}
             <TabsContent value="statistics">
                 <Statistics />
             </TabsContent>
-            
-            {/* Admin panel Tab */}
+
+            {/* Admin Panel */}
             <TabsContent value="admin">
                 <AdminPanel />
             </TabsContent>
-
             </Tabs>
-         {/* Movie Detail Dialog */}
+
+            {/* Movie Detail Dialog */}
             <Dialog open={!!selectedMovie} onOpenChange={() => setSelectedMovie(null)}>
             <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                 {selectedMovie && (
@@ -95,7 +96,7 @@ export default function Index() {
                         <h3 className="font-semibold mb-2">Synopsis</h3>
                         <p className="text-muted-foreground">{selectedMovie.synopsis}</p>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                             <span className="font-medium">Year:</span> {selectedMovie.year}
@@ -104,15 +105,17 @@ export default function Index() {
                             <span className="font-medium">Rating:</span> {selectedMovie.rating}/10
                         </div>
                         <div className="col-span-2">
-                            <span className="font-medium">Genres:</span> {selectedMovie.genre.join(', ')}
+                            <span className="font-medium">Genres:</span>{' '}
+                            {genreToArray(selectedMovie.genre).join(', ')}
                         </div>
-                        {selectedMovie.viewCount && (
+                        {selectedMovie.view_count > 0 && (
                             <div className="col-span-2">
-                            <span className="font-medium">Views:</span> {selectedMovie.viewCount.toLocaleString()}
+                            <span className="font-medium">Views:</span>{' '}
+                            {selectedMovie.view_count.toLocaleString()}
                             </div>
                         )}
                         </div>
-                        
+
                         <ReviewSection movie={selectedMovie} />
                     </div>
                     </div>
