@@ -1,15 +1,15 @@
+import AdminPanel from '@/components/AdminPanel';
 import MovieGrid from '@/components/MovieGrid';
+import ReviewSection from '@/components/ReviewSection';
+import SearchFilter from '@/components/SearchFilter';
+import Statistics from '@/components/Statistics';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import UserProfile from '@/components/UserProfile';
+import { useMovieStore } from '@/lib/movieStore';
 import type { Movie } from '@/lib/types';
 import { BarChart3, Film, Settings } from 'lucide-react';
 import { useState } from 'react';
-import AdminPanel from '../components/AdminPanel';
-import ReviewSection from '../components/ReviewSection';
-import SearchFilter from '../components/SearchFilter';
-import Statistics from '../components/Statistics';
-import UserProfile from '../components/UserProfile';
-import { useMovieStore } from '../lib/movieStore';
 
 
 export default function Index() {

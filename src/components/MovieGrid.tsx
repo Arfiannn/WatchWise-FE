@@ -1,6 +1,6 @@
-import MovieCard from './MovieCard';
-import type { Movie } from '@/lib/types'
 import { useMovieStore } from '@/lib/movieStore';
+import type { Movie } from '@/lib/types';
+import MovieCard from './MovieCard';
 
 interface MovieGridProps {
     movies: Movie[];
