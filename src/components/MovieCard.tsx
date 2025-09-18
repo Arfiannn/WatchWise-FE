@@ -1,8 +1,8 @@
-import { Star, Eye } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import type { Movie } from '@/services/movieService';
+import { Card, CardContent } from '@/components/ui/card';
 import { genreToArray } from '@/lib/utils';
+import type { Movie } from '@/services/movieService';
+import { Eye, Star } from 'lucide-react';
 
 interface MovieCardProps {
   movie: Movie;

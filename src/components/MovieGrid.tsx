@@ -1,6 +1,6 @@
 import { useMovieStore } from '@/lib/movieStore';
-import type { Movie } from '@/services/movieService';
 import { genreToArray } from '@/lib/utils';
+import type { Movie } from '@/services/movieService';
 import MovieCard from './MovieCard';
 
 interface MovieGridProps {
@@ -9,9 +9,30 @@ interface MovieGridProps {
 }
 
 export default function MovieGrid({ movies, onMovieClick }: MovieGridProps) {
-  const viewMode = useMovieStore((state) => state.viewMode);
+  const {
+    viewMode,
+    searchQuery,
+    selectedGenres,
+    sortBy,
+  } = useMovieStore();
 
-  if (movies.length === 0) {
+  const filteredMovies = movies
+    .filter((movie) => {
+      const matchTitle = movie.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const movieGenres = genreToArray(movie.genre);
+      const matchGenres =
+        selectedGenres.length === 0 || selectedGenres.some((genre) => movieGenres.includes(genre));
+      return matchTitle && matchGenres;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'title') return a.title.localeCompare(b.title);
+      if (sortBy === 'year') return b.year - a.year;
+      if (sortBy === 'rating') return b.rating - a.rating;
+      if (sortBy === 'viewCount') return (b.view_count ?? 0) - (a.view_count ?? 0);
+      return 0;
+    });
+
+  if (filteredMovies.length === 0) {
     return (
       <div className="text-center py-12">
         <p className="text-muted-foreground text-lg">No movies found</p>
@@ -25,7 +46,7 @@ export default function MovieGrid({ movies, onMovieClick }: MovieGridProps) {
   if (viewMode === 'list') {
     return (
       <div className="space-y-4">
-        {movies.map((movie) => (
+        {filteredMovies.map((movie) => (
           <div
             key={movie.id_movies}
             className="flex gap-4 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
@@ -57,7 +78,7 @@ export default function MovieGrid({ movies, onMovieClick }: MovieGridProps) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {movies.map((movie) => (
+      {filteredMovies.map((movie) => (
         <MovieCard
           key={movie.id_movies}
           movie={movie}
