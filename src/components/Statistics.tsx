@@ -1,39 +1,54 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { useMovieStore } from '@/lib/movieStore'
+import {
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis
+} from 'recharts';
+import { useMovieStore } from '@/lib/movieStore';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
 export default function Statistics() {
     const { movies, reviews } = useMovieStore();
 
-    // Calculate statistics
+    // Calculate genre stats safely
     const genreStats = movies.reduce((acc, movie) => {
-        movie.genre.forEach(genre => {
+        const genres = Array.isArray(movie.genre)
+        ? movie.genre
+        : movie.genre.split(',').map((g) => g.trim());
+
+        genres.forEach((genre) => {
         acc[genre] = (acc[genre] || 0) + 1;
         });
+
         return acc;
     }, {} as Record<string, number>);
 
-    const genreData = Object.entries(genreStats).map(([genre, count]) => ({
-        genre,
-        count
-    })).sort((a, b) => b.count - a.count);
+    const genreData = Object.entries(genreStats)
+        .map(([genre, count]) => ({ genre, count }))
+        .sort((a, b) => b.count - a.count);
 
     const topRatedMovies = [...movies]
         .sort((a, b) => b.rating - a.rating)
         .slice(0, 5)
-        .map(movie => ({
+        .map((movie) => ({
         title: movie.title.length > 15 ? movie.title.substring(0, 15) + '...' : movie.title,
         rating: movie.rating
         }));
 
     const mostViewedMovies = [...movies]
-        .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
+        .sort((a, b) => (b.view_count || 0) - (a.view_count || 0))
         .slice(0, 5)
-        .map(movie => ({
+        .map((movie) => ({
         title: movie.title.length > 15 ? movie.title.substring(0, 15) + '...' : movie.title,
-        views: movie.viewCount || 0
+        views: movie.view_count || 0
         }));
 
     const yearStats = movies.reduce((acc, movie) => {
@@ -43,15 +58,21 @@ export default function Statistics() {
         return acc;
     }, {} as Record<string, number>);
 
-    const yearData = Object.entries(yearStats).map(([decade, count]) => ({
-        decade,
-        count
-    })).sort((a, b) => a.decade.localeCompare(b.decade));
+    const yearData = Object.entries(yearStats)
+        .map(([decade, count]) => ({ decade, count }))
+        .sort((a, b) => a.decade.localeCompare(b.decade));
+
+    const averageRating =
+        movies.length === 0
+        ? 0
+        : movies.reduce((sum, movie) => sum + movie.rating, 0) / movies.length;
+
+    const totalViews = movies.reduce((sum, movie) => sum + (movie.view_count || 0), 0);
 
     return (
         <div className="space-y-6">
         <h2 className="text-2xl font-bold">Movie Statistics</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
             <CardHeader className="pb-2">
@@ -61,7 +82,7 @@ export default function Statistics() {
                 <div className="text-2xl font-bold">{movies.length}</div>
             </CardContent>
             </Card>
-            
+
             <Card>
             <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">Total Reviews</CardTitle>
@@ -70,26 +91,22 @@ export default function Statistics() {
                 <div className="text-2xl font-bold">{reviews.length}</div>
             </CardContent>
             </Card>
-            
+
             <Card>
             <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">Average Rating</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">
-                {(movies.reduce((sum, movie) => sum + movie.rating, 0) / movies.length).toFixed(1)}
-                </div>
+                <div className="text-2xl font-bold">{averageRating.toFixed(1)}</div>
             </CardContent>
             </Card>
-            
+
             <Card>
             <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">Total Views</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">
-                {movies.reduce((sum, movie) => sum + (movie.viewCount || 0), 0).toLocaleString()}
-                </div>
+                <div className="text-2xl font-bold">{totalViews.toLocaleString()}</div>
             </CardContent>
             </Card>
         </div>
