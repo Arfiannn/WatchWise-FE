@@ -17,8 +17,8 @@ interface MovieStore {
     // Actions
     fetchMovies: () => Promise<void>;
     fetchReviews: (id_movies: number) => Promise<void>;
-    addMovie: (movie: Omit<Movie, 'id_movies'>) => Promise<void>;
-    updateMovie: (id_movies: number | string, movie: Partial<Movie>) => Promise<void>;
+    addMovie: (movie: FormData) => Promise<void>;
+    updateMovie: (id_movies: number | string, movie: FormData) => Promise<void>;
     deleteMovie: (id_movies: number | string) => Promise<void>;
     addReview: (review: Omit<Review, 'id_reviews'> & { id_movies: number }) => Promise<void>;
 

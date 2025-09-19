@@ -5,8 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useMovieStore } from '@/lib/movieStore';
-import type { Movie } from '@/services/movieService';
 import { genreToArray } from '@/lib/utils';
+import type { Movie } from '@/services/movieService';
 import { Edit, Plus, Save, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 
@@ -20,7 +20,7 @@ export default function AdminPanel() {
     year: new Date().getFullYear(),
     rating: 0,
     synopsis: '',
-    poster: '',
+    poster: null as File | null,
   });
 
   const resetForm = () => {
@@ -30,29 +30,33 @@ export default function AdminPanel() {
       year: new Date().getFullYear(),
       rating: 0,
       synopsis: '',
-      poster: '',
+      poster: null,
     });
     setEditingMovie(null);
   };
 
- const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const movieData = {
-    ...formData,
-    genre: formData.genre.trim(),
-    view_count: 0, // ✅ tambah ini
+    const data = new FormData();
+    data.append("title", formData.title);
+    data.append("genre", formData.genre.trim());
+    data.append("year", String(formData.year));
+    data.append("rating", String(formData.rating));
+    data.append("synopsis", formData.synopsis);
+    if (formData.poster) {
+      data.append("poster", formData.poster);
+    }
+
+    if (editingMovie) {
+      await updateMovie(editingMovie.id_movies, data);
+    } else {
+      await addMovie(data);
+    }
+
+    setIsDialogOpen(false);
+    resetForm();
   };
-
-  if (editingMovie) {
-    updateMovie(editingMovie.id_movies, movieData);
-  } else {
-    addMovie(movieData);
-  }
-
-  setIsDialogOpen(false);
-  resetForm();
-};
 
   const handleEdit = (movie: Movie) => {
     setEditingMovie(movie);
@@ -62,7 +66,7 @@ export default function AdminPanel() {
       year: movie.year,
       rating: movie.rating,
       synopsis: movie.synopsis,
-      poster: movie.poster,
+      poster: null,
     });
     setIsDialogOpen(true);
   };
@@ -134,12 +138,15 @@ export default function AdminPanel() {
               </div>
 
               <div>
-                <label className="text-sm font-medium">Poster URL</label>
+                <label className="text-sm font-medium">Poster</label>
                 <Input
-                  value={formData.poster}
-                  onChange={(e) => setFormData({ ...formData, poster: e.target.value })}
-                  placeholder="https://example.com/poster.jpg"
-                  required
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setFormData({ ...formData, poster: file });
+                  }}
+                  required={!editingMovie}
                 />
               </div>
 
@@ -172,8 +179,13 @@ export default function AdminPanel() {
         {movies.map((movie) => (
           <Card key={movie.id_movies}>
             <CardContent className="p-4">
-              <div className="flex gap-4">
-                <img src={movie.poster} alt={movie.title} className="w-20 h-28 object-cover rounded" />
+              <div className="flex gap-4"> 
+                <img
+                  src={movie.poster}
+                  alt={movie.title}
+                  className="w-20 h-28 object-cover rounded"
+                />
+
                 <div className="flex-1">
                   <div className="flex justify-between items-start mb-2">
                     <div>

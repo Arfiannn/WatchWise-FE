@@ -16,21 +16,19 @@ export async function getMovies(): Promise<Movie[]> {
     return res.json();
 }
 
-export async function createMovie(movie: Omit<Movie, 'id_movies'>): Promise<Movie> {
+export async function createMovie(movie: FormData): Promise<Movie> {
     const res = await fetch(`${BASE_URL}/movies`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(movie),
+        body: movie,
     });
     if (!res.ok) throw new Error('Failed to create movie');
     return res.json();
 }
 
-export async function updateMovie(id_movies: number | string, movie: Partial<Movie>): Promise<Movie> {
+export async function updateMovie(id_movies: number | string, movie: FormData): Promise<Movie> {
     const res = await fetch(`${BASE_URL}/movies/${id_movies}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(movie),
+        body: movie,
     });
     if (!res.ok) throw new Error('Failed to update movie');
     return res.json();
