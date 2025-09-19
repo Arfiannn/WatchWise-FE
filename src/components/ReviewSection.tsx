@@ -5,38 +5,49 @@ import { Textarea } from '@/components/ui/textarea';
 import { useMovieStore } from '@/lib/movieStore';
 import type { Movie } from '@/services/movieService';
 import { Send, Star } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ReviewSectionProps {
   movie: Movie;
 }
 
 export default function ReviewSection({ movie }: ReviewSectionProps) {
-  const { getMovieReviews, addReview, getAverageRating } = useMovieStore();
+  const { getMovieReviews, addReview, getAverageRating, fetchReviews } = useMovieStore();
   const [userName, setUserName] = useState('');
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
 
+  // Fetch reviews when component mounts or movie changes
+  useEffect(() => {
+    fetchReviews(movie.id_movies);
+  }, [movie.id_movies, fetchReviews]);
+
   const reviews = getMovieReviews(movie.id_movies);
   const averageRating = getAverageRating(movie.id_movies);
 
-  const handleSubmitReview = (e: React.FormEvent) => {
+  const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (rating === 0 || !comment.trim() || !userName.trim()) return;
 
-   addReview({
-  id_movies: movie.id_movies,
-  user_name: userName.trim(),
-  rating,
-  comment: comment.trim(),
-  date: new Date().toISOString(),
-});
+    try {
+      await addReview({
+        id_movies: movie.id_movies,
+        user_name: userName.trim(),
+        rating,
+        comment: comment.trim(),
+        date: new Date().toISOString(),
+      });
 
-
-
-    setUserName('');
-    setRating(0);
-    setComment('');
+      // Reset form
+      setUserName('');
+      setRating(0);
+      setComment('');
+      
+      // Refresh reviews after adding
+      await fetchReviews(movie.id_movies);
+    } catch (error) {
+      console.error('Failed to add review:', error);
+    }
   };
 
   const renderStarRatingText = (value: number) => (
@@ -124,7 +135,9 @@ export default function ReviewSection({ movie }: ReviewSectionProps) {
                       <span className="font-medium">{review.user_name}</span>
                       {renderStarRatingText(review.rating)}
                     </div>
-                    <p className="text-sm text-muted-foreground mb-2">{review.date}</p>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {new Date(review.date).toLocaleDateString()}
+                    </p>
                     <p className="text-sm">{review.comment}</p>
                   </div>
                 </div>
