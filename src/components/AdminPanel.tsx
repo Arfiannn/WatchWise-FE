@@ -1,8 +1,9 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Textarea } from '@/components/ui/textarea';
 import { useMovieStore } from '@/lib/movieStore';
 import { genreToArray } from '@/lib/utils';
@@ -10,13 +11,18 @@ import type { Movie } from '@/services/movieService';
 import { Edit, Plus, Save, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 
+const allGenres = [
+  'Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Drama',
+  'Family', 'Fantasy', 'Horror', 'Romance', 'Sci-Fi', 'Thriller',
+];
+
 export default function AdminPanel() {
   const { movies, addMovie, updateMovie, deleteMovie } = useMovieStore();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingMovie, setEditingMovie] = useState<Movie | null>(null);
   const [formData, setFormData] = useState({
     title: '',
-    genre: '',
+    genre: [] as string[],
     year: new Date().getFullYear(),
     rating: 0,
     synopsis: '',
@@ -26,7 +32,7 @@ export default function AdminPanel() {
   const resetForm = () => {
     setFormData({
       title: '',
-      genre: '',
+      genre: [],
       year: new Date().getFullYear(),
       rating: 0,
       synopsis: '',
@@ -40,7 +46,7 @@ export default function AdminPanel() {
 
     const data = new FormData();
     data.append("title", formData.title);
-    data.append("genre", formData.genre.trim());
+    data.append("genre", formData.genre.join(', '));
     data.append("year", String(formData.year));
     data.append("rating", String(formData.rating));
     data.append("synopsis", formData.synopsis);
@@ -62,7 +68,7 @@ export default function AdminPanel() {
     setEditingMovie(movie);
     setFormData({
       title: movie.title,
-      genre: genreToArray(movie.genre).join(', '),
+      genre: genreToArray(movie.genre),
       year: movie.year,
       rating: movie.rating,
       synopsis: movie.synopsis,
@@ -107,7 +113,9 @@ export default function AdminPanel() {
                   <Input
                     type="number"
                     value={formData.year}
-                    onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, year: parseInt(e.target.value) })
+                    }
                     required
                   />
                 </div>
@@ -115,14 +123,51 @@ export default function AdminPanel() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium">Genre (comma separated)</label>
-                  <Input
-                    value={formData.genre}
-                    onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
-                    placeholder="Action, Drama, Thriller"
-                    required
-                  />
+                  <label className="text-sm font-medium mb-1 block">Genres</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start text-left">
+                        {formData.genre.length > 0
+                          ? formData.genre.join(', ')
+                          : 'Select genres'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64">
+                      <div className="grid grid-cols-2 gap-2">
+                        {allGenres.map((genre) => (
+                          <div key={genre} className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              id={`genre-${genre}`}
+                              checked={formData.genre.includes(genre)}
+                              onChange={() => {
+                                const updated = formData.genre.includes(genre)
+                                  ? formData.genre.filter((g) => g !== genre)
+                                  : [...formData.genre, genre];
+                                setFormData({ ...formData, genre: updated });
+                              }}
+                              className="form-checkbox"
+                            />
+                            <label htmlFor={`genre-${genre}`} className="text-sm cursor-pointer">
+                              {genre}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                      {formData.genre.length > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full mt-3 text-red-500"
+                          onClick={() => setFormData({ ...formData, genre: [] })}
+                        >
+                          Clear All
+                        </Button>
+                      )}
+                    </PopoverContent>
+                  </Popover>
                 </div>
+
                 <div>
                   <label className="text-sm font-medium">Rating (0-10)</label>
                   <Input
@@ -131,7 +176,9 @@ export default function AdminPanel() {
                     min="0"
                     max="10"
                     value={formData.rating}
-                    onChange={(e) => setFormData({ ...formData, rating: parseFloat(e.target.value) })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, rating: parseFloat(e.target.value) })
+                    }
                     required
                   />
                 </div>
@@ -179,13 +226,12 @@ export default function AdminPanel() {
         {movies.map((movie) => (
           <Card key={movie.id_movies}>
             <CardContent className="p-4">
-              <div className="flex gap-4"> 
+              <div className="flex gap-4">
                 <img
                   src={movie.poster}
                   alt={movie.title}
                   className="w-20 h-28 object-cover rounded"
                 />
-
                 <div className="flex-1">
                   <div className="flex justify-between items-start mb-2">
                     <div>
@@ -196,7 +242,11 @@ export default function AdminPanel() {
                       <Button size="sm" variant="outline" onClick={() => handleEdit(movie)}>
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button size="sm" variant="destructive" onClick={() => handleDelete(movie.id_movies)}>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDelete(movie.id_movies)}
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>

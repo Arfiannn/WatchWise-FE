@@ -30,6 +30,7 @@ export default function MovieCard({ movie, onClick }: MovieCardProps) {
         </div>
         <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/70 text-white px-2 py-1 rounded">
           <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+          <span className="text-xs font-medium">{movie.rating}/10</span>
         </div>
       </div>
 

@@ -1,7 +1,8 @@
+import * as api from '@/lib/api';
+import { genreToArray } from '@/lib/utils';
 import type { Movie } from '@/services/movieService';
 import type { Review } from '@/services/reviewService';
 import { create } from 'zustand';
-import * as api from '@/lib/api';
 
 interface MovieStore {
     movies: Movie[];
@@ -97,30 +98,38 @@ export const useMovieStore = create<MovieStore>((set, get) => ({
     setViewMode: (mode) => set({ viewMode: mode }),
 
     getFilteredMovies: () => {
-        const { movies, searchQuery, selectedGenres, sortBy } = get();
+    const { movies, searchQuery, selectedGenres, sortBy } = get();
 
-        const filtered = movies.filter((movie) => {
+    const filtered = movies.filter((movie) => {
+        
         const matchesSearch =
-            movie.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            movie.synopsis.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesGenre =
-            selectedGenres.length === 0 ||
-            selectedGenres.some((genre) => movie.genre.includes(genre));
-        return matchesSearch && matchesGenre;
-        });
+        movie.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        movie.synopsis.toLowerCase().includes(searchQuery.toLowerCase());
 
-        filtered.sort((a, b) => {
+        
+        const movieGenres = genreToArray(movie.genre).map((g) => g.toLowerCase());
+        const selected = selectedGenres.map((g) => g.toLowerCase());
+
+        const matchesGenre =
+        selected.length === 0 ||
+        selected.some((genre) => movieGenres.includes(genre));
+
+        return matchesSearch && matchesGenre;
+    });
+
+    
+    filtered.sort((a, b) => {
         switch (sortBy) {
-            case 'year':
+        case 'year':
             return b.year - a.year;
-            case 'rating':
+        case 'rating':
             return b.rating - a.rating;
-            case 'viewCount':
+        case 'viewCount':
             return (b.view_count || 0) - (a.view_count || 0);
-            default:
+        default:
             return a.title.localeCompare(b.title);
         }
-        });
+    });
 
         return filtered;
     },
