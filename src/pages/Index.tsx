@@ -7,10 +7,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import UserProfile from '@/components/UserProfile';
 import { useMovieStore } from '@/lib/movieStore';
+import { genreToArray } from '@/lib/utils';
 import type { Movie } from '@/services/movieService';
 import { BarChart3, Film, Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { genreToArray } from '@/lib/utils'; // helper untuk convert genre string ke array
 
 export default function Index() {
     const { getFilteredMovies, fetchMovies } = useMovieStore();
@@ -27,16 +27,25 @@ export default function Index() {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="container mx-auto px-4 py-8">
             {/* Header */}
-            <div className="flex justify-between items-center mb-8">
-            <div className="text-center flex-1">
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                WatchWise
-                </h1>
-                <p className="text-muted-foreground">
-                Discover, Review, and Manage Your Favorite Movies
+            <div className="relative h-64 w-full mb-8">
+            {/* Logo */}
+            <div className="absolute top-1/2 left-[48.1%] transform -translate-x-1/2 -translate-y-1/2">
+                <img
+                src="/logo.png"
+                alt="WatchWise Logo"
+                className="h-40 w-auto object-contain"
+                />
+            </div>
+
+            {/* Teks */}
+            <div className="absolute top-[75%] left-[%] w-full flex justify-center">
+                <p className="text-xl md:text-2xl font-semibold text-muted-foreground text-center">
+                Discover and Review Movies
                 </p>
             </div>
-            <div className="absolute top-8 right-8">
+
+            {/* User Profile */}
+            <div className="absolute top-0 right-0">
                 <UserProfile />
             </div>
             </div>
