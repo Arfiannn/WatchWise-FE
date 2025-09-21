@@ -21,7 +21,7 @@ export default function MovieCard({ movie, onClick }: MovieCardProps) {
         <img
           src={movie.poster}
           alt={movie.title}
-          className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110"
+          className="w-full h-130 object-cover transition-transform duration-300 group-hover:scale-110"
         />
         <div className="absolute top-2 right-2">
           <Badge variant="secondary" className="bg-black/70 text-white">
