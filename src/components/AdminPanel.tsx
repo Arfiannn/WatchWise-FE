@@ -27,6 +27,7 @@ export default function AdminPanel() {
     rating: 0,
     synopsis: '',
     poster: null as File | null,
+    trailer: '',
   });
 
   const resetForm = () => {
@@ -37,6 +38,7 @@ export default function AdminPanel() {
       rating: 0,
       synopsis: '',
       poster: null,
+      trailer: '',
     });
     setEditingMovie(null);
   };
@@ -52,6 +54,9 @@ export default function AdminPanel() {
     data.append("synopsis", formData.synopsis);
     if (formData.poster) {
       data.append("poster", formData.poster);
+    }
+    if (formData.trailer) {
+      data.append("trailer", formData.trailer);
     }
 
     if (editingMovie) {
@@ -73,6 +78,7 @@ export default function AdminPanel() {
       rating: movie.rating,
       synopsis: movie.synopsis,
       poster: null,
+      trailer: movie.trailer || "",
     });
     setIsDialogOpen(true);
   };
@@ -194,6 +200,16 @@ export default function AdminPanel() {
                     setFormData({ ...formData, poster: file });
                   }}
                   required={!editingMovie}
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Trailer (YouTube URL / mp4)</label>
+                <input
+                  type="text"
+                  className="border rounded px-3 py-1 w-full"
+                  value={formData.trailer || ""}
+                  onChange={(e) => setFormData({ ...formData, trailer: e.target.value })}
                 />
               </div>
 

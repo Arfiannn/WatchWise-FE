@@ -44,12 +44,10 @@ export default function ReviewSection({ movie }: ReviewSectionProps) {
         date: new Date().toISOString(),
       });
 
-      // Reset form
       setUserName('');
       setRating(0);
       setComment('');
 
-      // Refresh reviews setelah tambah
       await fetchReviews(movie.id_movies);
     } catch (error) {
       console.error('Failed to add review:', error);
@@ -63,8 +61,42 @@ export default function ReviewSection({ movie }: ReviewSectionProps) {
     </div>
   );
 
+  // --- Trailer Handler ---
+  let trailerUrl: string | null = null;
+  if (movie.trailer) {
+    if (movie.trailer.includes("watch?v=")) {
+      trailerUrl = movie.trailer.replace("watch?v=", "embed/");
+    } else if (movie.trailer.includes("youtu.be")) {
+      trailerUrl = movie.trailer.replace("youtu.be/", "youtube.com/embed/");
+    } else {
+      trailerUrl = movie.trailer;
+    }
+  }
+
   return (
     <div className="space-y-6">
+      {trailerUrl && (
+        <div>
+          <h3 className="font-semibold mb-2">Trailer</h3>
+          {trailerUrl.includes("youtube.com/embed/") ? (
+            <iframe
+              width="100%"
+              height="315"
+              src={trailerUrl}
+              title={`${movie.title} trailer`}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          ) : (
+            <video width="100%" height="315" controls>
+              <source src={trailerUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          )}
+        </div>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>Reviews & Ratings</CardTitle>
@@ -122,6 +154,7 @@ export default function ReviewSection({ movie }: ReviewSectionProps) {
         </CardContent>
       </Card>
 
+      {/* User Reviews */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">User Reviews</h3>
         {reviews.length === 0 ? (

@@ -2,11 +2,12 @@ import { BASE_URL } from '@/lib/api';
 export interface Movie {
     id_movies: number;
     title: string;
-    genre: string; // <- comma-separated string
+    genre: string;
     year: number;
     rating: number;
     synopsis: string;
     poster: string;
+    trailer: string;
     view_count: number;
 }
 
