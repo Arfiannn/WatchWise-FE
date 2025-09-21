@@ -5,22 +5,28 @@ import { Textarea } from '@/components/ui/textarea';
 import { useMovieStore } from '@/lib/movieStore';
 import type { Movie } from '@/services/movieService';
 import { Send, Star } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface ReviewSectionProps {
   movie: Movie;
 }
 
 export default function ReviewSection({ movie }: ReviewSectionProps) {
-  const { getMovieReviews, addReview, getAverageRating, fetchReviews } = useMovieStore();
+  const { getMovieReviews, addReview, getAverageRating, fetchReviews, View } = useMovieStore(); 
   const [userName, setUserName] = useState('');
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
 
-  // Fetch reviews when component mounts or movie changes
+  const viewedRef = useRef(false);
+
   useEffect(() => {
     fetchReviews(movie.id_movies);
-  }, [movie.id_movies, fetchReviews]);
+
+    if (!viewedRef.current) {
+      View(movie.id_movies);
+      viewedRef.current = true;
+    }
+  }, [movie.id_movies, fetchReviews, View]);
 
   const reviews = getMovieReviews(movie.id_movies);
   const averageRating = getAverageRating(movie.id_movies);
@@ -42,8 +48,8 @@ export default function ReviewSection({ movie }: ReviewSectionProps) {
       setUserName('');
       setRating(0);
       setComment('');
-      
-      // Refresh reviews after adding
+
+      // Refresh reviews setelah tambah
       await fetchReviews(movie.id_movies);
     } catch (error) {
       console.error('Failed to add review:', error);

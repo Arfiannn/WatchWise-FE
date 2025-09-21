@@ -40,3 +40,11 @@ export async function deleteMovie(id_movies: number | string): Promise<void> {
     });
     if (!res.ok) throw new Error('Failed to delete movie');
 }
+
+export async function View(id_movies: number): Promise<Movie> {
+    const res = await fetch(`${BASE_URL}/movies/${id_movies}/view`, {
+        method: "PUT",
+    });
+    if (!res.ok) throw new Error("Failed to view count");
+    return res.json();
+}

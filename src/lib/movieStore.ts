@@ -22,6 +22,7 @@ interface MovieStore {
     updateMovie: (id_movies: number | string, movie: FormData) => Promise<void>;
     deleteMovie: (id_movies: number | string) => Promise<void>;
     addReview: (review: Omit<Review, 'id_reviews'> & { id_movies: number }) => Promise<void>;
+    View: (id_movies: number) => Promise<void>;
 
     setSearchQuery: (query: string) => void;
     setSelectedGenres: (genres: string[]) => void;
@@ -88,8 +89,18 @@ export const useMovieStore = create<MovieStore>((set, get) => ({
     },
 
     addReview: async (reviewData) => {
-    const newReview = await api.addReview(reviewData.id_movies, reviewData);
-    set((state) => ({ reviews: [...state.reviews, newReview] }));
+        const newReview = await api.addReview(reviewData.id_movies, reviewData);
+        set((state) => ({ reviews: [...state.reviews, newReview] }));
+    },
+
+    View: async (id_movies) => {
+        console.log("🔥 Menambah view untuk movie:", id_movies);
+        const updated = await api.View(id_movies); 
+        set((state) => ({
+            movies: state.movies.map((m) =>
+            m.id_movies === id_movies ? updated : m
+            ),
+        }));
     },
 
     setSearchQuery: (query) => set({ searchQuery: query }),
