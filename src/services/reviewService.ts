@@ -23,3 +23,9 @@ export async function addReview(id_movies: number, review: Omit<Review, 'id_revi
     if (!res.ok) throw new Error('Failed to add review');
     return res.json();
 }
+
+export async function getAllReviews(): Promise<Review[]> {
+    const res = await fetch(`${BASE_URL}/reviews`);
+    if (!res.ok) throw new Error('Failed to fetch all reviews');
+    return res.json();
+}

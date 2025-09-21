@@ -18,6 +18,7 @@ interface MovieStore {
     // Actions
     fetchMovies: () => Promise<void>;
     fetchReviews: (id_movies: number) => Promise<void>;
+    fetchAllReviews: () => Promise<void>;
     addMovie: (movie: FormData) => Promise<void>;
     updateMovie: (id_movies: number | string, movie: FormData) => Promise<void>;
     deleteMovie: (id_movies: number | string) => Promise<void>;
@@ -68,6 +69,15 @@ export const useMovieStore = create<MovieStore>((set, get) => ({
         }
     },
 
+        fetchAllReviews: async () => {
+        try {
+            set({ isLoading: true });
+            const allReviews = await api.getAllReviews();
+            set({ reviews: allReviews, isLoading: false });
+        } catch (error: any) {
+            set({ error: error.message, isLoading: false });
+        }
+    },
     addMovie: async (movie) => {
         const newMovie = await api.createMovie(movie);
         set((state) => ({ movies: [...state.movies, newMovie] }));
